@@ -1,7 +1,7 @@
 <template>
   <v-layout column>
     <v-flex xs12>
-      <v-text-field name="editor" v-model="outputs.list[2].text" label="" textarea>
+      <v-text-field name="editor" v-model="axiomCmd" label="" textarea>
 
       </v-text-field>
     </v-flex>
@@ -9,84 +9,99 @@
       <v-tabs centered dark v-model="outputs.active">
         <v-tabs-bar >
           <v-tabs-item
-            v-for="tab in outputs.list"
-            :key="tab.id"
-            :href="'#' + tab.id"
+            :key="'raw-output'"
+            :href="'#raw'"
             ripple
           >
-            {{ tab.name }}
+            Raw
+          </v-tabs-item>
+          <v-tabs-item
+            :key="'latex-output'"
+            :href="'#latex'"
+            ripple
+          >
+            Latex
           </v-tabs-item>
           <v-tabs-slider color="accent"></v-tabs-slider>
         </v-tabs-bar>
         <v-tabs-items>
           <v-tabs-content
-            v-for="tab in outputs.list"
-            :key="tab.id"
-            :id="tab.id"
+            :key="'raw-output'"
+            :id="'raw'"
           >
             <v-card flat>
-              <v-card-text class="output-text">{{ tab.text }}</v-card-text>
+              <v-card-text class="output-text"><v-flex text-xs-center><pre>{{ outputs.raw }}</pre></v-flex></v-card-text>
+            </v-card>
+          </v-tabs-content>
+          <v-tabs-content
+            :key="'latex-output'"
+            :id="'latex'"
+          >
+            <v-card flat>
+              <v-card-text class="output-text">
+                <latex-display v-bind:latex="outputs.latex"></latex-display>
+              </v-card-text>
             </v-card>
           </v-tabs-content>
         </v-tabs-items>
       </v-tabs>
+    </v-flex>
+    <v-flex xs12>
+      <v-btn v-on:click.native="submitCmd()">Submit</v-btn>
     </v-flex>
   </v-layout>
 </template>
 
 <script type="text/babel">
   import io from 'socket.io-client'
+  import LatexDisplay from './latex-display.vue'
 
   export default {
-    components: {},
+    components: {LatexDisplay},
     methods: {
-      openConnection: () => {
-        this.connection = io('http://localhost:3001')
-        this.connection.on('connection', (socket) => {
-          console.log('Connected')
-        })
-
-        this.connection.on('disconnect', (socket) => {
-          console.log('Disconnected')
-        })
+      openConnection: function () {
+        this.connection = io('http://0.0.0.0:3001')
+        this.connection.on('connected', this.logMessage)
+        this.connection.on('evaluatedCmd', this.handleEvaluatedCmd)
+        this.connection.on('disconnected', this.logMessage)
       },
-      closeConnection: () => {
+      closeConnection: function () {
         if (this.connection) {
           this.connection.disconnect()
         }
         this.connection = undefined
+      },
+      handleEvaluatedCmd: function (response) {
+        let res = JSON.parse(response)
+        if (!res.error) {
+          this.updateOutput(res)
+        }
+      },
+      submitCmd: function () {
+        this.connection.emit('evalCmd', {cmd: this.axiomCmd})
+      },
+      logMessage: function ({message}) {
+        console.log(message)
+      },
+      updateOutput: function (result) {
+        this.outputs.raw = result.raw
+        this.outputs.latex = result.latex
       }
     },
     name: 'axiom-console',
     data () {
       return {
-        content: '',
+        axiomCmd: '',
         outputs: {
-          active: 'output-raw',
-          list: [
-            {
-              name: 'Raw',
-              id: 'output-raw',
-              text: ''
-            },
-            {
-              name: 'LaTeX',
-              id: 'output-latex',
-              text: ''
-            },
-            {
-              name: 'Content',
-              id: 'output-content',
-              text: ''
-            }
-          ]
+          latex: '',
+          raw: ''
         }
       }
     },
     mounted () {
       this.openConnection()
     },
-    beforeDestroyed () {
+    destroyed () {
       this.closeConnection()
     }
   }

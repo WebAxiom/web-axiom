@@ -1,12 +1,18 @@
 version: '2'
 services:
-  web:
-    image: "ubuntu"
+  app:
     build: ./app
+    volumes:
+      - ./app:/app
+    security_opt:
+     - seccomp:unconfined
     ports:
      - "3000:3000"
-  web:
-    image: "ubuntu"
+  api:
     build: ./api
+    volumes:
+      - ./api:/api
+    security_opt:
+     - seccomp:unconfined
     ports:
      - "3001:3001"
