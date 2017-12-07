@@ -1,5 +1,5 @@
 <template>
-  <v-flex xs12 text-xs-center v-html="_expr"></v-flex>
+  <v-flex xs12 v-html="_expr"></v-flex>
 </template>
 
 <script type="text/babel">
@@ -16,11 +16,11 @@
     computed: {
       _expr: function () {
         try {
-          console.log(this.latex)
           return katex.renderToString(this.latex, {throwOnError: false})
         } catch (err) {
           console.log(err)
-          return 'ERROR'
+          // TODO: LOG WHEN
+          return ''
         }
       }
     }

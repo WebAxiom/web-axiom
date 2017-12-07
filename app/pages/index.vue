@@ -1,6 +1,6 @@
 <template>
   <v-layout justify-center>
-    <v-flex xs8>
+    <v-flex xs10>
       <axiom-console>
 
       </axiom-console>

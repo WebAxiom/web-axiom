@@ -10,7 +10,7 @@ export let exec = (commands) => {
       if (err) {
         reject(err)
       } else {
-        let text = stdout.map(line => line.split('\r').join('')).join('\n')
+        let text = stdout.join('\n')
         let split = text.split('->')
         // TODO: length check
         let match = split[split.length - 2]

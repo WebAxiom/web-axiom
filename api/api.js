@@ -28,13 +28,10 @@ io.on('connection', (socket) => {
   socket.on('evalCmd', ({cmd}) => {
     AA.sendCommand(cmd)
       .then((res) => {
-        console.log('SUCCESS')
-        console.log(res)
         socket.emit('evaluatedCmd', JSON.stringify(res))
       })
       .catch((err) => {
-        console.log('ERROR')
-        console.log(err)
+        // TODO: LOG
         socket.emit('evaluatedCmd', {error: err})
       })
   })

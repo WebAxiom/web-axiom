@@ -1,53 +1,52 @@
 <template>
-  <v-layout column>
-    <v-flex xs12>
-      <v-text-field name="editor" v-model="axiomCmd" label="" textarea>
-
-      </v-text-field>
+  <v-layout>
+    <v-flex column>
+      <v-layout column>
+        <v-flex :order-xs1="opts.console" :order-xs2="!opts.console" row>
+          <v-card flat v-for="(item, index) in (opts.console ? outputs : rOutputs)" :key="index">
+            <v-card-text class="pa-0">
+              <v-layout>
+                <v-flex class="cell-indent pa-3" text-xs-center xs2><pre>[{{(item.lineno === undefined ? '' : `${item.lineno}`)}}]</pre></v-flex>
+                <v-flex class="pl-4 pr-3 pt-3 pb-3" >
+                  <v-flex v-if="item.input" class="cell-content pb-3">{{item.input}}</v-flex>
+                  <v-divider inset></v-divider>
+                  <v-flex v-if="opts.showRaw && item.raw && item.raw.length > 0" class="cell-content pt-2 pb-2"><pre>{{item.raw}}</pre></v-flex>
+                  <v-flex v-if="opts.showLatex && item.latex && item.latex.length > 0" class="cell-content pt-2"><latex-display :latex="item.latex"></latex-display></v-flex>
+                </v-flex>
+              </v-layout>
+            </v-card-text>
+          </v-card>
+        </v-flex>
+        <v-flex :order-xs1="!opts.console" :order-xs2="opts.console" row>
+          <v-card>
+            <v-card-text class="pa-0">
+              <v-layout>
+                <v-flex class="cell-indent primary pa-3" align-center text-xs-center><pre>-></pre></v-flex>
+                <v-flex class="pa-4" xs12>
+                  <v-text-field @keypress.13="enter" v-model="axiomCmd" label="" multi-line></v-text-field>
+                </v-flex>
+              </v-layout>
+              <!--<v-text-field @keypress.13="enter" name="editor" prefix='->' v-model="axiomCmd" label="" textarea></v-text-field>-->
+            </v-card-text>
+          </v-card>
+        </v-flex>
+      </v-layout>
     </v-flex>
-    <v-flex xs12>
-      <v-tabs centered dark v-model="outputs.active">
-        <v-tabs-bar >
-          <v-tabs-item
-            :key="'raw-output'"
-            :href="'#raw'"
-            ripple
-          >
-            Raw
-          </v-tabs-item>
-          <v-tabs-item
-            :key="'latex-output'"
-            :href="'#latex'"
-            ripple
-          >
-            Latex
-          </v-tabs-item>
-          <v-tabs-slider color="accent"></v-tabs-slider>
-        </v-tabs-bar>
-        <v-tabs-items>
-          <v-tabs-content
-            :key="'raw-output'"
-            :id="'raw'"
-          >
-            <v-card flat>
-              <v-card-text class="output-text"><v-flex text-xs-center><pre>{{ outputs.raw }}</pre></v-flex></v-card-text>
-            </v-card>
-          </v-tabs-content>
-          <v-tabs-content
-            :key="'latex-output'"
-            :id="'latex'"
-          >
-            <v-card flat>
-              <v-card-text class="output-text">
-                <latex-display v-bind:latex="outputs.latex"></latex-display>
-              </v-card-text>
-            </v-card>
-          </v-tabs-content>
-        </v-tabs-items>
-      </v-tabs>
-    </v-flex>
-    <v-flex xs12>
-      <v-btn v-on:click.native="submitCmd()">Submit</v-btn>
+    <v-flex xs3 column>
+      <v-flex class="pa-5">
+        <v-checkbox label="Console view"
+                    v-model="opts.console"
+                    true-value
+                    hide-details></v-checkbox>
+        <v-checkbox label="Show raw output"
+                    v-model="opts.showRaw"
+                    true-value
+                    hide-details></v-checkbox>
+        <v-checkbox label="Show latex"
+                    v-model="opts.showLatex"
+                    true-value
+                    hide-details></v-checkbox>
+      </v-flex>
     </v-flex>
   </v-layout>
 </template>
@@ -57,45 +56,75 @@
   import LatexDisplay from './latex-display.vue'
 
   export default {
-    components: {LatexDisplay},
+    components: {
+      LatexDisplay
+    },
+    computed: {
+      rOutputs: function () {
+        return [].concat(this.outputs).reverse()
+      }
+    },
     methods: {
       openConnection: function () {
         this.connection = io('http://0.0.0.0:3001')
-        this.connection.on('connected', this.logMessage)
+        this.connection.on('connected', ({message}) => console.log(message))
         this.connection.on('evaluatedCmd', this.handleEvaluatedCmd)
-        this.connection.on('disconnected', this.logMessage)
+        this.connection.on('disconnected', ({message}) => console.log(message))
       },
       closeConnection: function () {
         if (this.connection) {
           this.connection.disconnect()
+        } else {
+          console.log('--- closeConnection ---  Connection is undefined')
         }
         this.connection = undefined
       },
       handleEvaluatedCmd: function (response) {
-        let res = JSON.parse(response)
-        if (!res.error) {
-          this.updateOutput(res)
+        if (response) {
+          try {
+            let res = JSON.parse(response)
+            if (!res.error) {
+              this.updateOutput(res)
+            } else {
+              console.log('--- handleEvaluatedCmd ---  response has error')
+              console.log(res.output)
+            }
+          } catch (err) {
+            console.log('--- handleEvaluatedCmd ---  ', err)
+          }
+        } else {
+          console.log('--- handleEvaluatedCmd ---  response is undefined')
+        }
+      },
+      enter: function (event) {
+        // TODO: Do not allow empty
+        if (event.shiftKey) {
+          event.preventDefault()
+          this.submitCmd()
         }
       },
       submitCmd: function () {
-        this.connection.emit('evalCmd', {cmd: this.axiomCmd})
-      },
-      logMessage: function ({message}) {
-        console.log(message)
+        if (this.connection) {
+          this.connection.emit('evalCmd', {cmd: this.axiomCmd})
+        } else {
+          console.log('--- submitCmd ---  Connection is undefined')
+        }
       },
       updateOutput: function (result) {
-        this.outputs.raw = result.raw
-        this.outputs.latex = result.latex
+        this.outputs.push(result)
       }
     },
     name: 'axiom-console',
     data () {
       return {
         axiomCmd: '',
-        outputs: {
-          latex: '',
-          raw: ''
-        }
+        opts: {
+          console: true,
+          showRaw: true,
+          showLatex: true
+        },
+        outputs: [
+        ]
       }
     },
     mounted () {
@@ -108,6 +137,12 @@
 </script>
 
 <style lang="stylus" scoped>
-  .output-text
-    word-wrap break-word
+  .cell-content
+    overflow-x auto
+    > pre
+      overflow-x auto
+
+  .cell-indent
+    min-width: 4.5em
+    max-width: 5em
 </style>
