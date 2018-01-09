@@ -1,6 +1,6 @@
 import express from 'express'
 import socketio from 'socket.io'
-import {AxiomAdapter} from './axiom-adapter'
+import { AxiomAdapter } from './axiom-adapter'
 
 const API_PORT = 3001
 
@@ -18,7 +18,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   res.header('Access-Control-Allow-Credentials', 'true')
   next()
-});
+})
 
 io.on('connection', (socket) => {
   socket.emit('connected', {message: 'Connected'})
@@ -39,6 +39,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', (data) => {
     socket.emit('disconnected', {message: 'Disconnected'})
   })
-});
+})
 
 

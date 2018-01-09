@@ -8,7 +8,7 @@ export class AxiomAdapter {
     this.history = []
   }
 
-  sendCommand(cmd) {
+  sendCommand (cmd) {
     return new Promise((resolve, reject) => {
       // TODO: Prepare the cmd - remove spaces, etc.
       let cleanCmd = cmd.split('\n').join(' ')

@@ -1,11 +1,13 @@
 <template>
-  <v-layout justify-center>
-    <v-flex xs10>
-      <axiom-console>
+  <v-container fluid>
+    <v-layout justify-center>
+      <v-flex>
+        <axiom-console>
 
-      </axiom-console>
-    </v-flex>
-  </v-layout>
+        </axiom-console>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -13,6 +15,7 @@
 
   export default {
     components: {AxiomConsole},
+    methods: {},
     data () {
       return {}
     }

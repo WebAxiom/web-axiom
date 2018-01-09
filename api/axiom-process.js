@@ -1,6 +1,5 @@
 import { spawn } from 'nexpect'
 
-
 export let exec = (commands) => {
   let proc = spawn('axiom -noht').wait('->').sendline(')set output tex on').wait('->')
   commands.forEach((cmd) => proc = proc.sendline(cmd).wait('->'))
@@ -14,7 +13,7 @@ export let exec = (commands) => {
         let split = text.split('->')
         // TODO: length check
         let match = split[split.length - 2]
-        resolve (match)
+        resolve(match)
       }
     })
   })

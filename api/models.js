@@ -8,7 +8,7 @@ export class AxiomCommand {
     this.latex = ''
     let split = output.split('$$')
     let type_split = output.split('Type:')
-    if(split.length === 3) {
+    if (split.length === 3) {
       this.error = false
       this.extractLineNo(split[0])
       this.latex = split[1].trim().replace(/\\leqno\(\d+?\)/, '')
@@ -26,7 +26,7 @@ export class AxiomCommand {
     this.latex = this.latexToKatex(this.latex)
   }
 
-  latexToKatex(latex) {
+  latexToKatex (latex) {
     // TODO: think of better solution to this, but will work for now
     let mappings = [
       ['\\sb', '_']
@@ -39,14 +39,14 @@ export class AxiomCommand {
     return katex
   }
 
-  extractLineNo(raw) {
+  extractLineNo (raw) {
     // TODO: check if raw is string
     let split = raw.split('\n')
-    if(split.length > 0) {
+    if (split.length > 0) {
       let mid = Math.floor(split.length / 2)
       let lineno_re = /^\s*?\((\d+)\)/g
       let match = lineno_re.exec(split[mid])
-      if(match) {
+      if (match) {
         split[mid] = ' '.repeat(lineno_re.lastIndex) + split[mid].substr(lineno_re.lastIndex)
         this.lineno = match[1]
       } else {
