@@ -10,7 +10,7 @@
             <v-toolbar style="flex: 0 0 auto;" dark class="primary pr-3 pl-3">
                 <v-toolbar-title>Settings</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-btn icon @click.native.stop="setOpen(false)" dark>
+                <v-btn icon @click.native.stop="closeWindow()" dark>
                     <v-icon>close</v-icon>
                 </v-btn>
             </v-toolbar>
@@ -51,6 +51,24 @@
     methods: {
       setOpen: function (value) {
         this.$store.commit('settings/setOpen', value)
+      },
+      closeWindow: function () {
+        this.setOpen(false)
+      },
+      onKeyUp: function (event) {
+        if (event.keyCode === 27) {
+          this.closeWindow()
+        }
+      }
+    },
+    watch: {
+      // whenever question changes, this function will run
+      open: function (newOpen) {
+        if (newOpen && process.browser) {
+          window.addEventListener('keyup', this.onKeyUp, true)
+        } else if (process.browser) {
+          window.removeEventListener('keyup', this.onKeyUp, true)
+        }
       }
     },
     computed: {

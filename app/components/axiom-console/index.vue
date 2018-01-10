@@ -4,20 +4,20 @@
       <v-layout column>
         <v-flex row>
           <v-card flat v-for="(item, index) in outputs" :key="index">
-            <v-card-text class="pa-0">
+            <v-card-text class="pa-0 elevation-3">
               <v-layout>
-                <v-flex class="cell-indent pa-3" text-xs-center xs2>
+                <v-flex class="command-gutter pa-3" text-xs-center xs2>
                   <pre>[{{(item.lineno === undefined ? '' : `${item.lineno}`)}}]</pre>
                 </v-flex>
-                <v-flex class="pl-4 pr-3 pt-3 pb-3">
-                  <v-flex v-if="item.input" class="cell-content pb-3">{{item.input}}</v-flex>
-                  <v-divider inset></v-divider>
+                <v-flex class="pa-4">
+                  <v-flex v-if="item.input" class="cell-content pa-2">{{item.input}}</v-flex>
+                  <v-divider></v-divider>
                   <v-flex v-if="preferences.showRaw && item.raw && item.raw.length > 0"
-                          class="cell-content pt-2 pb-2">
+                          class="cell-content pa-2">
                     <pre>{{item.raw}}</pre>
                   </v-flex>
                   <v-flex v-if="item.latex && item.latex.length > 0"
-                          class="cell-content pt-2">
+                          class="cell-content pa-2">
                     <latex-display :latex="item.latex"></latex-display>
                   </v-flex>
                 </v-flex>
@@ -28,16 +28,16 @@
         <v-flex row>
           <v-card>
             <v-card-text class="pa-0">
-              <v-layout>
-                <v-flex class="primary pa-3" justify-center align-center text-align-center>
+              <v-layout class="command-line">
+                <v-flex class="command-gutter primary pa-3" text-xs-center>
+                  <v-spacer></v-spacer>
                   <v-icon>mdi-chevron-double-right</v-icon>
                 </v-flex>
                 <v-flex class="pa-4" xs12>
-                  <v-text-field @keypress.13="enter" v-model="axiomCmd" label=""
-                                multi-line></v-text-field>
+                  <v-text-field @keypress.shift.enter="onKeyPress" v-model="axiomCmd"></v-text-field>
                 </v-flex>
               </v-layout>
-              <!--<v-text-field @keypress.13="enter" name="editor" prefix='->' v-model="axiomCmd" label="" textarea></v-text-field>-->
+              <!--<v-text-field @keypress.13="onKeyPress" name="editor" prefix='->' v-model="axiomCmd" label="" textarea></v-text-field>-->
             </v-card-text>
           </v-card>
         </v-flex>
@@ -51,12 +51,10 @@
   import { mapState } from 'vuex'
 
   import LatexDisplay from './latex-display.vue'
-  import ChevronDoubleRight from '~/components/icons/chevron-double-right'
 
   export default {
     components: {
-      LatexDisplay,
-      ChevronDoubleRight
+      LatexDisplay
     },
     computed: {
       ...mapState('settings', {preferences: (state) => state.console})
@@ -94,14 +92,14 @@
           console.log('--- handleEvaluatedCmd ---  response is undefined')
         }
       },
-      enter: function (event) {
-        // TODO: Maybe (?) do not allow empty
+      onKeyPress: function (event) {
         if (event.shiftKey) {
           event.preventDefault()
           this.submitCmd()
         }
       },
       submitCmd: function () {
+        // TODO: Maybe (?) do not allow empty
         if (this.connection) {
           this.connection.emit('evalCmd', {cmd: this.axiomCmd})
         } else {
@@ -129,12 +127,16 @@
 </script>
 
 <style lang="stylus" scoped>
+  .command-line
+    min-height: 10rem
+
+  .command-gutter
+    max-width: 5rem
+    width: 5rem
+
   .cell-content
     overflow-x auto
     > pre
       overflow-x auto
 
-  .cell-indent
-    min-width: 4.5em
-    max-width: 5em
 </style>
