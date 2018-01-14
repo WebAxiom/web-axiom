@@ -1,0 +1,8 @@
+funcB(x, a, b) == x + a + b
+funcA(x) == 
+  a := 3
+  b := 4
+  funcB(x, a, b)
+
+
+funcA(4) + funcA(-30)

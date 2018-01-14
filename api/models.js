@@ -1,29 +1,41 @@
-export class AxiomCommand {
+import _ from 'lodash'
+import parsers from './parsers'
 
-  constructor (input, output) {
-    // let re = /\(\d+\)(.*?)\$\$(.*)\$\$.*?Type:(.*?)\(.*?\)/
-    // let result = re.exec(output)
+export class AxiomCommand {
+  constructor (input) {
     this.input = input
-    this.output = output
-    this.latex = ''
-    let split = output.split('$$')
-    let type_split = output.split('Type:')
-    if (split.length === 3) {
-      this.error = false
-      this.extractLineNo(split[0])
-      this.latex = split[1].trim().replace(/\\leqno\(\d+?\)/, '')
-      this.varType = split[2].trim() // TODO: clean type
-    }
-    else if (split.length === 1 && type_split.length === 2) {
-      this.error = false
-      this.extractLineNo(type_split[0])
-      this.varType = type_split[1].trim()
-    }
-    else {
-      this.error = false
-      this.raw = this.extractLineNo(output)
-    }
-    this.latex = this.latexToKatex(this.latex)
+    this.comments = []
+    this.syntaxErrors = []
+    this.functionDefs = []
+    this.compileMessages = []
+    this.setLatex('')
+    this.cleanInput()
+  }
+
+  cleanInput () {
+    this.cleanCmd = this.input.replace(/(\n|\r)/, '')
+  }
+
+  parseOutput () {
+    let source = [
+      {name: 'syntax errors', parseFun: parsers.syntaxErrors, setFun: this.setSyntaxErrors.bind(this)},
+      {name: 'compile messages', parseFun: parsers.compileMessages, setFun: this.setCompileMessages.bind(this)},
+      {name: 'function definitions', parseFun: parsers.functionDefs, setFun: this.setFunctionDefs.bind(this)},
+      {name: 'latex', parseFun: parsers.latex, setFun: this.setLatex.bind(this)},
+      {name: 'type', parseFun: parsers.type, setFun: this.setVarType.bind(this)}, // TODO: probably worthless
+      {name: 'comments', parseFun: parsers.comments, setFun: this.setComments.bind(this)},
+      {name: 'rest', parseFun: s => ({rest: s, result: s}), setFun: this.setPlainText.bind(this)}
+    ]
+    source.reduce((output, s) => {
+      try {
+        let parse = s.parseFun(output)
+        s.setFun(_.isString(parse.result) ? parse.result.trim() : parse.result)
+        return parse.rest
+      } catch (err) {
+        console.log(err)
+        return output
+      }
+    }, this.output)
   }
 
   latexToKatex (latex) {
@@ -34,39 +46,65 @@ export class AxiomCommand {
 
     let katex = latex
 
-    mappings.forEach(el => katex = katex.split(el[0]).join(el[1]))
+    mappings.forEach((el) => { katex = katex.replace(el[0], el[1]) })
 
     return katex
   }
 
-  extractLineNo (raw) {
-    // TODO: check if raw is string
-    let split = raw.split('\n')
-    if (split.length > 0) {
-      let mid = Math.floor(split.length / 2)
-      let lineno_re = /^\s*?\((\d+)\)/g
-      let match = lineno_re.exec(split[mid])
-      if (match) {
-        split[mid] = ' '.repeat(lineno_re.lastIndex) + split[mid].substr(lineno_re.lastIndex)
-        this.lineno = match[1]
-      } else {
-        this.lineno = undefined
-        // TODO: LOG line number not on this line
-      }
-    } else {
-      this.lineno = undefined
-      // TODO: Silly error, should not happen
+  getCommand () {
+    return this.cleanCmd
+  }
+
+  setSyntaxErrors (syntaxErrors) {
+    if (_.isArray(syntaxErrors)) {
+      this.syntaxErrors = syntaxErrors
     }
+    // TODO: error
+  }
 
-    // TODO: ignore instead of removing
-    split = split.filter(el => el.trim().length !== 0)
-    let cnts = split.map(el => {
-      let match = /^\s*/.exec(el)
-      return match ? match[0].length : 0
-    }).sort()
-    let mn = cnts.length > 0 ? cnts[0] : 0
+  setFunctionDefs (functionDefs) {
+    if (_.isArray(functionDefs)) {
+      this.functionDefs = functionDefs
+    }
+    // TODO: error
+  }
 
-    this.raw = split.map(el => el.substr(mn)).join('\n')
+  setComments (comments) {
+    if (_.isArray(comments)) {
+      this.comments = comments
+    }
+    // TODO: error
+  }
 
+  setCompileMessages (compileMessages) {
+    if (_.isArray(compileMessages)) {
+      this.compileMessages = compileMessages
+    }
+    // TODO: error
+  }
+
+  setPlainText (plainText) {
+    // TODO: error
+    this.plainText = plainText || ''
+  }
+
+  setVarType (varType) {
+    // TODO: error
+    this.varType = varType || ''
+  }
+
+  setLatex (latex) {
+    // TODO: error
+    this.latex = latex ? this.latexToKatex(latex) : ''
+  }
+
+  setLineNo (lineno) {
+    // TODO: error
+    this.lineno = lineno || ''
+  }
+
+  setOutput (output) {
+    this.output = output
+    this.parseOutput()
   }
 }

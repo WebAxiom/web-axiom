@@ -1,0 +1,31 @@
+-- Returns the Cauchy bound on the positive roots of a polynomial
+-- Inputs:
+--   p.....a univariate polynomial in x with rational coefficients.
+--   x.....a symbol.
+-- Output:
+--   An upper bound on the positive roots of the polynomial (an error is returned if
+--   it obviously has none, but an absense of an error does not mean it has any).
+-- Remark:
+--   This is a quick and dirty version, it uses floating point arithmetic!
+
+cauchy(p:POLY(FRAC(INT))):Float==
+  local V,x,n
+  V:=variables(p)
+  if #(V)>1 then error "The input must be a univariate polynomial"
+  else if #(V)=1 then x:=V.1
+  if leadingCoefficient(p)<0 then p:=-p
+  C:=coefficients(p)
+  n:=0
+  for c in C repeat if c<0 then n:=n+1
+  if n=0 then error "The polynomial has no positive roots"
+  else
+    m:=degree(p,V).1
+    lc:=leadingCoefficient(p)
+    Blist:=[]::List(AlgebraicNumber)
+    for i in 0..m-1 repeat
+      coeff:=coefficient(p,x,i)
+      if coeff<0 then Blist:=cons((-n*coeff/lc)^(1/(m-i)),Blist)
+    B:=map(r+->r::Float,Blist::List(AlgebraicNumber))
+    mx:=B.1::Float
+    for v in B repeat if v::Float>mx then mx:=v::Float
+    mx

@@ -57,6 +57,8 @@
       },
       onKeyUp: function (event) {
         if (event.keyCode === 27) {
+          event.preventDefault()
+          event.stopPropagation()
           this.closeWindow()
         }
       }

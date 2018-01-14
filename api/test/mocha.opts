@@ -1,0 +1,6 @@
+--recursive
+--reporter spec
+--bail
+--check-leaks
+--require babel-core/register
+test/**/*.spec.js

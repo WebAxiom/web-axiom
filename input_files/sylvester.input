@@ -1,0 +1,27 @@
+--)set userlevel interpreter
+--)set userlevel compiler
+
+-- Input:
+--  f,g.....polynomials in x with integer coefficeints
+-- Output:
+--  The Sylvester matrix of f, g.
+SylvesterMatrix(f,g,x)==
+  if f=0 or g=0 then error "Cannot have an argument equal to 0"
+  f:=f::Polynomial(Integer)
+  g:=g::Polynomial(Integer)
+  m:=totalDegree(f)
+  n:=totalDegree(g)
+--  Cf:=reverse(coefficients(f))
+--  Cg:=reverse(coefficients(g))
+  S:Matrix(Integer):=new(m+n,m+n,0)
+  for i in 1..n repeat
+    for j in 1..m+n repeat
+      if j>=i and j-i<=m then
+        --print(m-(j-i))
+	S(i,j):=coefficient(f*x,x,1+m-(j-i))::Integer
+  for i in n+1..m+n repeat
+    for j in 1..m+n repeat
+      if j>=i-n and j-(i-n)<=n then
+        S(i,j):=coefficient(g*x,x,1+n-(j-(i-n)))::Integer
+  S
+

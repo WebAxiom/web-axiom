@@ -28,6 +28,11 @@ module.exports = {
     ]
   },
   plugins: ['~/plugins/vuetify.js'],
+  env: {
+    HOST: process.env.HOST,
+    API_PORT: process.env.API_PORT,
+    APP_PORT: process.env.APP_PORT
+  },
   css: [
     '~/assets/style/app.styl',
     '~/node_modules/mdi/css/materialdesignicons.css'
@@ -41,7 +46,7 @@ module.exports = {
   */
   build: {
     vendor: [
-      '~/plugins/vuetify.js',
+      '~/plugins/vuetify.js'
     ],
     extractCSS: true,
     /*

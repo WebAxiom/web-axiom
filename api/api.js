@@ -1,19 +1,17 @@
 import express from 'express'
 import socketio from 'socket.io'
-import { AxiomAdapter } from './axiom-adapter'
-
-const API_PORT = 3001
+import { AxiomSession } from './axiom-session'
 
 const app = express()
 
-const server = app.listen(API_PORT, () => {
-  console.log(`Api started on ${API_PORT}`)
+const server = app.listen(process.env.API_PORT, () => {
+  console.log(`Api started at http://${process.env.HOST}${process.env.API_PORT ? ':' + process.env.API_PORT : ''}`)
 })
 
 const io = socketio.listen(server)
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://0.0.0.0:3000')
+  res.header('Access-Control-Allow-Origin', `http://${process.env.HOST}${process.env.APP_PORT ? ':' + process.env.APP_PORT : ''}`)
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   res.header('Access-Control-Allow-Credentials', 'true')
@@ -23,12 +21,12 @@ app.use((req, res, next) => {
 io.on('connection', (socket) => {
   socket.emit('connected', {message: 'Connected'})
 
-  let AA = new AxiomAdapter()
+  let AA = new AxiomSession()
 
   socket.on('evalCmd', ({cmd}) => {
     AA.sendCommand(cmd)
       .then((res) => {
-        socket.emit('evaluatedCmd', JSON.stringify(res))
+        socket.emit('evaluatedCmd', res)
       })
       .catch((err) => {
         // TODO: LOG
@@ -40,5 +38,3 @@ io.on('connection', (socket) => {
     socket.emit('disconnected', {message: 'Disconnected'})
   })
 })
-
-
