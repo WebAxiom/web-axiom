@@ -1,1 +1,4 @@
 )read b.input
+
+
+funcA(4) + funcA(-30) + funcC(12)

@@ -22,6 +22,18 @@ export default {
     let rest = replace ? source.replace(regex, '') : source
     return {result, rest}
   },
+  userErrors: (source, replace = true) => {
+    let regex = /^\s*Error signalled from user code:\s*[ \t\S]*?[ \t]*\n/gm
+    let result = source.match(regex)
+    let rest = replace ? source.replace(regex, '') : source
+    return {result, rest}
+  },
+  compiledFunctions: (source, replace = true) => {
+    let regex = /^\s*Compiling function ([\S]+) with type ([\S]+)\s+->\s+([\S]+)/gm
+    let result = source.match(regex)
+    let rest = replace ? source.replace(regex, '') : source
+    return {result, rest}
+  },
   compileMessages: (source, replace = true) => {
     let regex = /(.*):(\d+):(\d+): (warning|note): ([\S\s]*?)(\n[\s^~]*\n)/g
     let result = []

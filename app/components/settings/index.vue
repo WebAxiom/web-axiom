@@ -29,7 +29,7 @@
                     <v-subheader>Console preferences</v-subheader>
                     <v-list-tile avatar>
                         <v-list-tile-action>
-                            <v-checkbox v-model="displayRawOutput" true-value></v-checkbox>
+                            <v-checkbox v-model="displayPlainText" true-value></v-checkbox>
                         </v-list-tile-action>
                         <v-list-tile-content>
                             <v-list-tile-title>Raw Output</v-list-tile-title>
@@ -83,12 +83,12 @@
           this.setOpen(value)
         }
       },
-      displayRawOutput: {
+      displayPlainText: {
         get () {
-          return this.console.displayRawOutput
+          return this.console.displayPlainText
         },
         set (value) {
-          this.$store.commit('settings/setDisplayRawOutput', { value })
+          this.$store.commit('settings/setDisplayPlainText', { value })
         }
       }
     }

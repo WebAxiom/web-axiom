@@ -15,6 +15,7 @@ export class AxiomSession {
       this.history.push(axiomCommand)
       this.exec(this.history)
         .then(({output, lineno}) => {
+          console.log(output)
           axiomCommand.setOutput(output)
           axiomCommand.setLineNo(lineno)
           // TODO: serialize to send smaller payload
@@ -34,7 +35,7 @@ export class AxiomSession {
           reject(err)
         } else {
           let text = stdout.join('\n')
-          let split = text.split(/\((\d+)\)\s+->\s+/)
+          let split = text.split(/\((\d+)\)\s+->/)
           if (split.length >= 4) {
             let output = split[split.length - 3]
             let lineno = parseInt(split[split.length - 4])

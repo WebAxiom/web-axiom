@@ -4,5 +4,4 @@ funcA(x) ==
   b := 4
   funcB(x, a, b)
 
-
-funcA(4) + funcA(-30)
+funcC(x) == x

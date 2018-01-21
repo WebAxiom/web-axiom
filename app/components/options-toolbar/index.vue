@@ -1,10 +1,10 @@
 <template>
   <v-toolbar app fixed dark color="primary" class="pr-3 pl-3">
     <v-toolbar-side-icon @click.stop="toggleTreeView"></v-toolbar-side-icon>
-    <v-toolbar-title class="white--text">Working tree path?</v-toolbar-title>
+    <v-toolbar-title class="white--text"><!--TODO: ??? Working tree path? --></v-toolbar-title>
     <v-spacer></v-spacer>
     <v-btn icon>
-      <v-icon>help</v-icon>
+      <v-icon>help</v-icon> 
     </v-btn>
     <v-btn icon @click.native.stop="openSettings">
       <v-icon>settings</v-icon>

@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
       })
       .catch((err) => {
         // TODO: LOG
-        socket.emit('evaluatedCmd', {error: err})
+        socket.emit('evaluatedCmd', {sysError: err})
       })
   })
 

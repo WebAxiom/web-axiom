@@ -1,9 +1,8 @@
 <template>
   <v-navigation-drawer
-    clipped
-    fixed
-    app
     v-model="open"
+    disable-resize-watcher
+    clipped fixed app
   >
     <v-list dense>
       <!--<v-list-tile @click="">-->

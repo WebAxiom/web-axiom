@@ -1,6 +1,6 @@
 export const state = () => ({
   console: {
-    displayRawOutput: true
+    displayPlainText: true
   },
   open: false
 })
@@ -9,8 +9,8 @@ export const mutations = {
   setOpen: (state, {value}) => {
     state.open = value
   },
-  setDisplayRawOutput: (state, {value}) => {
-    state.console.displayRawOutput = value
+  setDisplayPlainText: (state, {value}) => {
+    state.console.displayPlainText = value
   }
 }
 
