@@ -1,6 +1,6 @@
 export const state = () => ({
   console: {
-    displayPlainText: true
+    displayPlainText: false
   },
   open: false
 })

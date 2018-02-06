@@ -17,7 +17,7 @@
                   </v-flex>
                   <v-flex v-if="item.latex && item.latex.length > 0"
                           class="pa-3">
-                    <latex-display :latex="item.latex"></latex-display>
+                    <latex-display :latex="item.latex.length > 0 ? item.latex[item.latex.length-1] : ''"></latex-display>
                   </v-flex>
                 </v-flex>
                 <v-flex class="command-gutter right-gutter pa-3" text-xs-center>
@@ -32,10 +32,22 @@
                     <span>Success</span>
                   </v-tooltip>
                   <v-tooltip left>
+                    <v-btn :class="`ma-0 mb-2 ${item.displayPlainText ? 'primary--text' : ''}`" @click.native="togglePlainTextDisplay(item)" slot="activator" icon>
+                      <v-icon>mdi-note-text</v-icon>
+                    </v-btn>
+                    <span>{{ item.displayPlainText ? "Hide" : "Display"}} plain text</span>
+                  </v-tooltip>
+                  <v-tooltip left>
                     <v-btn class="ma-0 mb-2" @click.native="copyCommand(item)" slot="activator" icon>
                       <v-icon>mdi-content-copy</v-icon>
                     </v-btn>
                     <span>Copy command to input</span>
+                  </v-tooltip>
+                  <v-tooltip left>
+                    <v-btn class="ma-0 mb-2" @click.native="openLatexDialog(item)" slot="activator" icon>
+                      <v-icon>mdi-function</v-icon>
+                    </v-btn>
+                    <span>Display latex raw</span>
                   </v-tooltip>
                 </v-flex>
               </v-layout>
@@ -64,6 +76,13 @@
           </v-card>
         </v-flex>
       </v-layout>
+      <v-dialog v-model="latexDialog.open">
+        <v-card>
+          <v-card-text>
+            <pre>{{latexDialog.item && latexDialog.item.latex.length > 0 ? '$$\n' + latexDialog.item.latex[latexDialog.item.latex.length-1] + '\n$$' : ''}}</pre>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
       <v-navigation-drawer :width="600"
                            v-model="errorView.open"
                            :temporary="this.$vuetify.breakpoint.width < 1400"
@@ -147,6 +166,7 @@
             let res = response
             // console.log(res)
             if (!res.sysError) {
+              console.log(res)
               this.updateOutput(res)
               this.clearInput()
             } else {
@@ -167,9 +187,12 @@
         }
       },
       displayPlainText: function (item) {
-        return (this.preferences.displayPlainText &&
+        return (item.displayPlainText &&
                   item.plainText.length &&
                   item.plainText.length > 0)
+      },
+      togglePlainTextDisplay: function (item) {
+        item.displayPlainText = !item.displayPlainText
       },
       clearInput: function () {
         this.axiomCmd = ''
@@ -184,6 +207,12 @@
           commandId: index
         }
       },
+      openLatexDialog: function (item) {
+        this.latexDialog = {
+          open: true,
+          item: item
+        }
+      },
       submitCmd: function () {
         // TODO: Maybe (?) do not allow empty
         if (this.connection) {
@@ -193,6 +222,7 @@
         }
       },
       updateOutput: function (result) {
+        result.displayPlainText = this.preferences.displayPlainText
         this.history.push(result)
       }
     },
@@ -205,6 +235,10 @@
           open: false,
           command: null,
           commandId: null
+        },
+        latexDialog: {
+          open: false,
+          item: null
         }
       }
     },
@@ -219,13 +253,13 @@
 
 <style lang="stylus" scoped>
   .axiom-text
-    overflow-x auto
     font-family: monospace;
     white-space: pre-wrap;       /* css-3 */
     white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
     white-space: -pre-wrap;      /* Opera 4-6 */
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    max-width: 100%
 
   .command
     border: 1px #E0E0E0 solid

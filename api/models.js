@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import parsers from './parsers'
+import utils from './utils'
 
 export class AxiomCommand {
   constructor (input) {
@@ -10,9 +11,10 @@ export class AxiomCommand {
     this.functionDefs = []
     this.errors = []
     this.userErrors = []
+    this.commandNotFoundErrors = []
     this.comments = []
     this.syntaxErrors = []
-    this.setLatex('')
+    this.latex = []
     this.cleanInput()
   }
 
@@ -20,30 +22,23 @@ export class AxiomCommand {
     this.cleanCmd = this.input.replace(/(\n|\r)/, '')
   }
 
-  trim (obj) {
-    if (_.isString(obj)) {
-      return obj.trim()
-    } else if (_.isArray(obj) && obj.length > 0 && _.isString(obj[0])) {
-      return obj.map(s => s.replace(/^\s*$/gm, ''))
-    }
-  }
-
   parseOutput () {
     let source = [
-      {replace: true, parseFun: parsers.syntaxErrors, setFun: this.setSyntaxErrors.bind(this)},
-      {replace: true, parseFun: parsers.userErrors, setFun: this.setUserErrors.bind(this)},
-      {replace: true, parseFun: parsers.compileMessages, setFun: this.setCompileMessages.bind(this)},
-      {replace: true, parseFun: parsers.compiledFunctions, setFun: this.setCompiledFunctions.bind(this)},
-      {replace: false, parseFun: parsers.functionDefs, setFun: this.setFunctionDefs.bind(this)},
-      {replace: true, parseFun: parsers.latex, setFun: this.setLatex.bind(this)},
-      {replace: true, parseFun: parsers.type, setFun: this.setVarType.bind(this)}, // TODO: probably worthless
-      {replace: true, parseFun: parsers.comments, setFun: this.setComments.bind(this)},
-      {replace: false, parseFun: (s, r) => ({rest: s, result: s}), setFun: this.setPlainText.bind(this)}
+      {remove: false, parseFun: parsers.syntaxErrors, setFun: this.setSyntaxErrors.bind(this)},
+      {remove: false, parseFun: parsers.userErrors, setFun: this.setUserErrors.bind(this)},
+      {remove: false, parseFun: parsers.commandNotFoundErrors, setFun: this.setCommandNotFoundErrors.bind(this)},
+      {remove: false, parseFun: parsers.compileMessages, setFun: this.setCompileMessages.bind(this)},
+      {remove: false, parseFun: parsers.compiledFunctions, setFun: this.setCompiledFunctions.bind(this)},
+      {remove: false, parseFun: parsers.functionDefs, setFun: this.setFunctionDefs.bind(this)},
+      {remove: false, parseFun: parsers.latex, setFun: this.setLatex.bind(this)},
+      // {remove: true, parseFun: parsers.type, setFun: this.setVarType.bind(this)}, // TODO: probably worthless
+      // {remove: true, parseFun: parsers.comments, setFun: this.setComments.bind(this)},
+      {remove: false, parseFun: (s, r) => ({rest: s, result: s}), setFun: this.setPlainText.bind(this)}
     ]
     source.reduce((output, s) => {
       try {
-        let parse = s.parseFun(output, s.replace)
-        s.setFun(this.trim(parse.result))
+        let parse = s.parseFun(output, s.remove)
+        s.setFun(utils.trim(parse.result))
         return parse.rest
       } catch (err) {
         console.log(err)
@@ -55,7 +50,8 @@ export class AxiomCommand {
   detectErrors () {
     this.errors = _.merge(
       this.syntaxErrors.map(e => ({type: 'Syntax error', message: e})),
-      this.userErrors.map(e => ({type: 'User code error', message: e}))
+      this.userErrors.map(e => ({type: 'User code error', message: e})),
+      this.commandNotFoundErrors.map(e => ({type: 'Invalid command', message: e}))
     )
     this.compilation = _.merge(
       this.compileMessages,
@@ -68,14 +64,17 @@ export class AxiomCommand {
   latexToKatex (latex) {
     // TODO: think of better solution to this, but will work for now
     let mappings = [
-      ['\\sb', '_']
+      ['\\sb', '_'],
+      [/\\root {([\s\S]*?)} \\of {([\s\S]*?)}/g, '\\sqrt[$1]{$2}'],
+      [/\s*\\leqno\(\d+\)/g, ''],
+      [/\$\$/g, '']
     ]
 
     let katex = latex
 
     mappings.forEach((el) => { katex = katex.replace(el[0], el[1]) })
 
-    return katex
+    return katex.trim()
   }
 
   getCommand () {
@@ -103,6 +102,12 @@ export class AxiomCommand {
     // TODO: error
   }
 
+  setCommandNotFoundErrors (commandNotFoundErrors) {
+    if (_.isArray(commandNotFoundErrors)) {
+      this.commandNotFoundErrors = commandNotFoundErrors
+    }
+  }
+
   setFunctionDefs (functionDefs) {
     if (_.isArray(functionDefs)) {
       this.functionDefs = functionDefs
@@ -124,6 +129,13 @@ export class AxiomCommand {
     // TODO: error
   }
 
+  setLatex (latex) {
+    if (_.isArray(latex)) {
+      this.latex = latex.map(l => this.latexToKatex(l))
+    }
+    // TODO: error
+  }
+
   setPlainText (plainText) {
     // TODO: error
     this.plainText = plainText || ''
@@ -132,11 +144,6 @@ export class AxiomCommand {
   setVarType (varType) {
     // TODO: error
     this.varType = varType || ''
-  }
-
-  setLatex (latex) {
-    // TODO: error
-    this.latex = latex ? this.latexToKatex(latex) : ''
   }
 
   setLineNo (lineno) {

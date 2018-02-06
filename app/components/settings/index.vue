@@ -11,7 +11,7 @@
                 <v-toolbar-title>Settings</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-btn icon @click.native.stop="closeWindow()" dark>
-                    <v-icon>close</v-icon>
+                    <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-toolbar>
             <v-card-text>

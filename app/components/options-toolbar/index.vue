@@ -1,13 +1,15 @@
 <template>
   <v-toolbar app fixed dark color="primary" class="pr-3 pl-3">
-    <v-toolbar-side-icon @click.stop="toggleTreeView"></v-toolbar-side-icon>
+    <v-btn icon>
+      <v-icon @click.native.stop="toggleTreeView">mdi-menu</v-icon>
+    </v-btn>
     <v-toolbar-title class="white--text"><!--TODO: ??? Working tree path? --></v-toolbar-title>
     <v-spacer></v-spacer>
     <v-btn icon>
-      <v-icon>help</v-icon> 
+      <v-icon>mdi-help</v-icon>
     </v-btn>
     <v-btn icon @click.native.stop="openSettings">
-      <v-icon>settings</v-icon>
+      <v-icon>mdi-settings</v-icon>
     </v-btn>
   </v-toolbar>
 </template>
