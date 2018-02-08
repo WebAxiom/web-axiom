@@ -1,9 +1,9 @@
 <template>
-  <v-flex xs12 v-html="_expr"></v-flex>
+  <div class="latex pa-2">{{latex}}</div>
 </template>
 
 <script type="text/babel">
-  import katex from 'katex'
+  // import katex from 'katex'
 
   export default {
     name: 'latex-display',
@@ -13,19 +13,25 @@
         required: true
       }
     },
-    computed: {
-      _expr: function () {
-        try {
-          return katex.renderToString(this.latex, {throwOnError: false})
-        } catch (err) {
-          console.log(err)
-          // TODO: LOG WHEN
-          return ''
+    watch: {
+      'window.MathJax' (val) {
+        this.renderMathJax()
+      }
+    },
+    mounted () {
+      this.renderMathJax()
+    },
+    methods: {
+      renderMathJax () {
+        if (process.browser && window.MathJax) {
+          window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, this.$el])
         }
       }
     }
   }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
+  .latex
+    overflow-x auto
 </style>

@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "katex": "^0.9.0-alpha1",
+    "mathjax": "^2.7.2",
+    "mathjax-node": "^2.0.1",
     "mdi": "^2.1.19",
     "nuxt": "^1.0.0",
     "socket.io": "^2.0.4",

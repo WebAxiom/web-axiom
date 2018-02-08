@@ -1,5 +1,5 @@
 <template>
-  <v-layout>
+  <v-layout class="command-line-wrapper">
     <v-flex column>
       <v-layout column>
         <v-flex row>
@@ -12,42 +12,33 @@
                 <v-flex class="pa-4">
                   <v-flex v-if="item.input" class="axiom-text pa-3">{{item.input}}</v-flex>
                   <v-divider></v-divider>
-                  <v-flex v-if="displayPlainText(item)" class="axiom-text pa-3">
-                    <pre>{{item.plainText}}</pre>
-                  </v-flex>
-                  <v-flex v-if="item.latex && item.latex.length > 0"
-                          class="pa-3">
-                    <latex-display :latex="item.latex.length > 0 ? item.latex[item.latex.length-1] : ''"></latex-display>
+                  <v-flex class="pl-3 pr-3 pt-4 pb-2">
+                    <v-flex :key="index" v-for="(token, index) in item.tokens">
+                      <!-- TODO: Just proof of concept, definitely need rethinking-->
+                      <pre v-if="token.plainText && item.displayPlainText">{{token.text}}</pre>
+                      <latex-display :style="'max-width:' + latexWidth + 'px;}' + 'width:' + latexWidth + 'px;}'" v-if="token.latex" :latex="token.text"></latex-display>
+                      <error-element v-if="token.error || token.compilation" :data="token"></error-element>
+                    </v-flex>
                   </v-flex>
                 </v-flex>
                 <v-flex class="command-gutter right-gutter pa-3" text-xs-center>
-                  <v-tooltip v-if="item.cmdError" left>
-                    <v-btn class="ma-0 mb-2 red--text" @click.native="openErrorView(item, index)" slot="activator" icon>
+                  <v-tooltip left>
+                    <v-btn v-if="isErrorCollapsed(item) !== null" :class="`ma-0 mb-2 ${!isErrorCollapsed(item) ? 'red--text' : ''}`" @click.native="toggleErrorDisplay(item)" slot="activator" icon>
                       <v-icon>mdi-alert-circle</v-icon>
                     </v-btn>
-                    <span>Errors occurred during execution</span>
-                  </v-tooltip>
-                  <v-tooltip v-if="!item.cmdError" left>
-                    <v-icon  class="mb-2 green--text" slot="activator" medium>mdi-checkbox-marked-circle</v-icon>
-                    <span>Success</span>
+                    <span>{{!isErrorCollapsed(item) ? "Hide" : "Show"}}  all errors</span>
                   </v-tooltip>
                   <v-tooltip left>
                     <v-btn :class="`ma-0 mb-2 ${item.displayPlainText ? 'primary--text' : ''}`" @click.native="togglePlainTextDisplay(item)" slot="activator" icon>
                       <v-icon>mdi-note-text</v-icon>
                     </v-btn>
-                    <span>{{ item.displayPlainText ? "Hide" : "Display"}} plain text</span>
+                    <span>{{ item.displayPlainText ? "Hide" : "Show"}} plain text</span>
                   </v-tooltip>
                   <v-tooltip left>
                     <v-btn class="ma-0 mb-2" @click.native="copyCommand(item)" slot="activator" icon>
                       <v-icon>mdi-content-copy</v-icon>
                     </v-btn>
                     <span>Copy command to input</span>
-                  </v-tooltip>
-                  <v-tooltip left>
-                    <v-btn class="ma-0 mb-2" @click.native="openLatexDialog(item)" slot="activator" icon>
-                      <v-icon>mdi-function</v-icon>
-                    </v-btn>
-                    <span>Display latex raw</span>
                   </v-tooltip>
                 </v-flex>
               </v-layout>
@@ -63,7 +54,8 @@
                   <v-icon>mdi-chevron-double-right</v-icon>
                 </v-flex>
                 <v-flex class="pa-0 ma-0" xs12>
-                  <v-text-field class="pa-0 command-input"
+                  <v-text-field id="axiom-input"
+                                class="pa-0"
                                 @keypress.shift.enter.stop.prevent="onKeyPress"
                                 v-model="axiomCmd"
                                 textarea auto-grow hide-details ></v-text-field>
@@ -76,57 +68,6 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <v-dialog v-model="latexDialog.open">
-        <v-card>
-          <v-card-text>
-            <pre>{{latexDialog.item && latexDialog.item.latex.length > 0 ? '$$\n' + latexDialog.item.latex[latexDialog.item.latex.length-1] + '\n$$' : ''}}</pre>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-      <v-navigation-drawer :width="600"
-                           v-model="errorView.open"
-                           :temporary="this.$vuetify.breakpoint.width < 1400"
-                           disable-resize-watcher
-                           clipped fixed app right>
-        <!-- TODO: prolly use computed values instead of these long variables -->
-        <v-flex v-if="errorView.command">
-          <v-toolbar class="elevation-1">
-            <v-toolbar-title>{{`[${errorView.command.lineno}]`}}</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-btn @click.native="errorView.open = false" icon>
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-toolbar>
-          <v-flex v-if="errorView.command.cmdError">
-            <v-subheader class="red white--text">
-              {{`Errors found (${errorView.command.errors.length})`}}
-            </v-subheader>
-            <v-divider></v-divider>
-            <v-card v-for="(item, index) in errorView.command.errors" v-bind:key="index">
-              <v-card-title>
-                <div>
-                  <h3>{{ `${index + 1}. ${item.type} `}}</h3>
-                  <div class="axiom-text">{{ item.message }}</div>
-                </div>
-              </v-card-title>
-            </v-card>
-          </v-flex>
-          <v-flex v-if="errorView.command.cmdCompile">
-            <v-subheader class="orange white--text">
-              {{`Compilation (${errorView.command.compilation.length})`}}
-            </v-subheader>
-            <v-divider></v-divider>
-            <v-card v-for="(item, index) in errorView.command.compilation" v-bind:key="index">
-              <v-card-title>
-                <div>
-                  <h3>{{ `${index + 1}. ${item.type} `}}</h3>
-                  <div class="axiom-text">{{ item.message }}</div>
-                </div>
-              </v-card-title>
-            </v-card>
-          </v-flex>
-        </v-flex>
-      </v-navigation-drawer>
     </v-flex>
   </v-layout>
 </template>
@@ -136,13 +77,23 @@
   import { mapState } from 'vuex'
 
   import LatexDisplay from './latex-display.vue'
+  import ErrorElement from './error-element'
 
   export default {
     components: {
+      ErrorElement,
       LatexDisplay
     },
     computed: {
-      ...mapState('settings', {preferences: (state) => state.console})
+      ...mapState('settings', {preferences: (state) => state.console}),
+      latexWidth () {
+        if (process.browser) {
+          let width = (this.$vuetify.breakpoint.width || window.innerWidth || 250) - 250
+          console.log(width)
+          return width
+        }
+        return 0
+      }
     },
     methods: {
       openConnection: function () {
@@ -164,7 +115,6 @@
         if (response) {
           try {
             let res = response
-            // console.log(res)
             if (!res.sysError) {
               console.log(res)
               this.updateOutput(res)
@@ -186,13 +136,19 @@
           this.submitCmd()
         }
       },
-      displayPlainText: function (item) {
-        return (item.displayPlainText &&
-                  item.plainText.length &&
-                  item.plainText.length > 0)
-      },
       togglePlainTextDisplay: function (item) {
         item.displayPlainText = !item.displayPlainText
+      },
+      toggleErrorDisplay: function (item) {
+        item.tokens.map(token => (token.display = token.error ? this.isErrorCollapsed(item) : token.display))
+      },
+      isErrorCollapsed: function (item) {
+        let errors = item.tokens.filter(t => t.error)
+        if (errors.length === 0) {
+          return null
+        } else {
+          return errors.map(t => t.display).indexOf(false) !== -1
+        }
       },
       clearInput: function () {
         this.axiomCmd = ''
@@ -203,8 +159,10 @@
       openErrorView: function (item, index) {
         this.errorView = {
           open: true,
-          command: item,
-          commandId: index
+          commandId: index,
+          errors: item.errors,
+          compilation: item.compilation,
+          lineno: item.lineno
         }
       },
       openLatexDialog: function (item) {
@@ -224,6 +182,9 @@
       updateOutput: function (result) {
         result.displayPlainText = this.preferences.displayPlainText
         this.history.push(result)
+        if (this.axiomInput) {
+          setTimeout(_ => this.axiomInput.scrollIntoView(), 0)
+        }
       }
     },
     name: 'axiom-console',
@@ -233,7 +194,9 @@
         history: [],
         errorView: {
           open: false,
-          command: null,
+          errors: [],
+          compilation: [],
+          lineno: null,
           commandId: null
         },
         latexDialog: {
@@ -244,6 +207,9 @@
     },
     mounted () {
       this.openConnection()
+      if (process.browser) {
+        this.axiomInput = document.getElementById('axiom-input')
+      }
     },
     destroyed () {
       this.closeConnection()
@@ -252,6 +218,7 @@
 </script>
 
 <style lang="stylus" scoped>
+
   .axiom-text
     font-family: monospace;
     white-space: pre-wrap;       /* css-3 */
@@ -259,7 +226,6 @@
     white-space: -pre-wrap;      /* Opera 4-6 */
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    max-width: 100%
 
   .command
     border: 1px #E0E0E0 solid
@@ -267,10 +233,6 @@
   .command-line
     min-height: 10rem
     border: 1px #E0E0E0 solid
-
-  .command-input {
-    font-family: monospace
-  }
 
   .command-gutter
     max-width: 5rem

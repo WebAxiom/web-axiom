@@ -24,6 +24,10 @@ module.exports = {
         src: 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-alpha1/katex.min.js',
         integrity: 'sha384-GR8SEkOO1rBN/jnOcQDFcFmwXAevSLx7/Io9Ps1rkxWp983ZIuUGfxivlF/5f5eJ',
         crossorigin: 'anonymous'
+      },
+      {
+        async: true,
+        src: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'
       }
     ]
   },

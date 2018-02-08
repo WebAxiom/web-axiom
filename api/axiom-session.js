@@ -18,8 +18,8 @@ export class AxiomSession {
           console.log(output)
           axiomCommand.setOutput(output)
           axiomCommand.setLineNo(lineno)
-          // TODO: serialize to send smaller payload
-          resolve(axiomCommand)
+          axiomCommand.parseCommand()
+          resolve(axiomCommand.getPayload())
         })
         .catch((err) => reject(err))
     })
