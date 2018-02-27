@@ -2,14 +2,22 @@
   <v-card>
     <v-card-text class="pa-0">
       <v-layout class="cmd-line">
-        <div class="cmd-gutter left-gutter"></div>
-        <div class="cmd-input-wrapper">
-          <textarea :value="value" @input="updateCommand" class="pa-3 axiom-text cmd-text cmd-input"> </textarea>
-          <div class="pa-3 ma-0 axiom-text cmd-text cmd-display" v-html="value"></div>
-        </div>
-        <div class="cmd-gutter primary">
-         <v-btn depressed class="ma-0 pa-0 primary submit-btn" @click.native="onEnter()"><v-icon>mdi-chevron-double-right</v-icon></v-btn>
-        </div>
+        <v-flex class="cmd-gutter left-gutter pa-3">
+        </v-flex>
+        <v-flex class="pa-0 ma-0 cmd-input-wrapper" xs12>
+          <v-text-field class="pa-0 cmd-input axiom-text cmd-text"
+                        @keypress.shift.enter.stop.prevent="onEnter()"
+                        :value="value"
+                        @input="updateCommand"
+                        placeholder="Type you command here"
+                        multi-line auto-grow hide-details solo></v-text-field>
+          <v-flex class="pa-0 axiom-text cmd-text cmd-display" v-html="output">
+
+          </v-flex>
+        </v-flex>
+        <v-flex class="cmd-gutter primary" text-xs-center>
+          <v-btn depressed class="ma-0 pa-0 primary submit-btn" @click.native="onEnter()"><v-icon>mdi-chevron-double-right</v-icon></v-btn>
+        </v-flex>
       </v-layout>
     </v-card-text>
   </v-card>
@@ -19,35 +27,31 @@
   export default {
     name: 'axiom-input',
     props: ['value'],
-
+    computed: {
+      output () {
+        return this.value
+      }
+    },
     methods: {
       onEnter () {
         this.$emit('submit')
       },
-      updateCommand (event) {
-        this.$emit('input', event.target.value)
-        this.adjustHeight(event)
+      updateCommand (val) {
+        this.adjustHeight()
+        this.$emit('input', val)
       },
-      adjustHeight (event) {
-        const el = event.srcElement
-        const height = el.scrollHeight > el.clientHeight ? el.scrollHeight : null
-        const wrapper = this.$el.getElementsByClassName('cmd-input-wrapper')[0]
-        console.log(el.scrollHeight, el.clientHeight, wrapper.style.height)
-        // const input = this.$el.getElementsByClassName('cmd-input')[0]
-        // const display = this.$el.getElementsByClassName('cmd-display')[0]
-        if (height) {
-          wrapper.style.height = height - 2 + 'px'
-          // input.style.height = height + 'px'
-        } else {
-          // input.style.height = '100%'
-          wrapper.style.height = '100%'
-        }
-        // display.style.height = height + 'px'
+      adjustHeight () {
+        const el = this.$el.getElementsByClassName('cmd-input')[0]
+        const height = el.scrollHeight
+        console.log(el.scrollHeight, el.clientHeight)
+        const wrapper = this.$el.getElementsByClassName('cmd-line')[0]
+        const display = this.$el.getElementsByClassName('cmd-display')[0]
+        wrapper.style.height = height + 1 + 'px'
+        display.style.height = height - 1 + 'px'
       }
     },
     mounted () {
-      console.log('????')
-      console.log(this.$el)
+      console.log(this.value)
     }
   }
 </script>
@@ -56,8 +60,7 @@
   @require '~vuetify/src/stylus/settings/_colors.styl'
 
   .cmd-input-wrapper
-    width 100%
-    min-height: 100%
+    position:relative
 
   .submit-btn
     min-width 100%
@@ -69,18 +72,18 @@
 
   .cmd-text
     position absolute
-    width calc(100% - 10rem)
+    width 100%
     min-height 100%
     overflow hidden
     font-family monospace
 
   .cmd-input
-    resize none
-    z-index 1
-    outline: 0;
-    &:focus
-      box-shadow: inset 0 0 5px $colors.indigo.base
+    z-index 0
+    box-shadow: inset 0 0 5px $colors.indigo.base
+    background: none
 
   .cmd-display
-    z-index 0
+    padding 8px 16px !important
+    z-index 1
+
 </style>

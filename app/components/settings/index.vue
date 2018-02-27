@@ -29,7 +29,7 @@
                     <v-subheader>Console preferences</v-subheader>
                     <v-list-tile avatar>
                         <v-list-tile-action>
-                            <v-checkbox v-model="displayPlainText" true-value></v-checkbox>
+                            <v-switch  v-model="displayPlainText" true-value></v-switch>
                         </v-list-tile-action>
                         <v-list-tile-content>
                             <v-list-tile-title>Raw Output</v-list-tile-title>
