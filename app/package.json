@@ -5,20 +5,21 @@
   "author": "Kazimieras <kazimieras.on@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
-    "build": "nuxt build",
-    "start": "nuxt start",
+    "dev": "env-cmd .env nuxt",
+    "build": "env-cmd .env nuxt build",
+    "prod": "nuxt build && env-cmd .env nuxt start",
+    "dice": "nuxt build && bash extract_dice_dependencies.sh",
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "katex": "^0.9.0-alpha1",
-    "mathjax": "^2.7.2",
-    "mathjax-node": "^2.0.1",
     "mdi": "^2.1.19",
-    "nuxt": "^1.0.0",
+    "nuxt": "^1.3.0",
     "socket.io": "^2.0.4",
     "vue": "^2.5.13",
-    "vuetify": "^1.0.0-beta.2"
+    "vuetify": "^1.0.2",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.1",
+    "env-cmd": "^7.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.1",
@@ -32,8 +33,6 @@
     "eslint-plugin-node": "^5.1.1",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.5.1",
-    "eslint-plugin-standard": "^3.0.1",
-    "stylus": "^0.54.5",
-    "stylus-loader": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1"
   }
 }

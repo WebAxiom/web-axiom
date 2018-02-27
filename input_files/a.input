@@ -1,4 +1,3 @@
-1/0
-1/0
-1/0
-1/0
+m:SQMATRIX(2,INT) := squareMatrix matrix [[0,1], [-1,0]]
+n:SQMATRIX(2,SQMATRIX(2,INT)) := squareMatrix matrix [[m, m**2], [m**3, m**4]]
+o:SQMATRIX(2,SQMATRIX(2, SQMATRIX(2, INT))) := squareMatrix matrix [[n, n^2], [n^3, n^4]]

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import parsers from './../parsers'
+import parsers from '../api/parsers'
 
 describe('parsers', () => {
   describe('comments', () => {

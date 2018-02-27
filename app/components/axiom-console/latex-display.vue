@@ -1,10 +1,10 @@
 <template>
-  <div class="latex pa-2">{{latex}}</div>
+  <div class="latex pt-3 pb-4 pl-2 pr-2">
+    {{latex}}
+  </div>
 </template>
 
 <script type="text/babel">
-  // import katex from 'katex'
-
   export default {
     name: 'latex-display',
     props: {

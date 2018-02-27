@@ -4,8 +4,9 @@
   "description": "",
   "main": "api.js",
   "scripts": {
-    "start": "babel-node api.js",
+    "start": "env-cmd .env babel-node api",
     "babel-node": "babel-node",
+    "dice": "bash extract_dice_dependencies.sh",
     "test": "mocha"
   },
   "author": "",
@@ -14,15 +15,12 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-es2015-spread": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "cors": "^2.8.4",
+    "babel-preset-env": "^1.6.1",
+    "env-cmd": "^7.0.0",
     "express": "^4.16.2",
-    "http": "0.0.0",
-    "lodash": "^4.17.4",
-    "nexpect": "^0.5.0",
     "socket.io": "^2.0.4"
   },
   "devDependencies": {
-    "babel-preset-env": "^1.6.1",
     "chai": "^4.1.2",
     "mocha": "^4.1.0"
   }

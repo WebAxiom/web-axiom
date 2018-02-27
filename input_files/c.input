@@ -1,7 +1,7 @@
-funcB(x, a, b) == x + a + b
-funcA(x) == 
-  a := 3
-  b := 4
-  funcB(x, a, b)
-
-funcC(x) == x
+u:=operator 'u ; f:=operator 'f
+heat:=(-2*t*D(f(x/sqrt(t))/sqrt(t),x,2)-x*D(f(x/sqrt(t))/sqrt(t),x)-f(x/sqrt(t))/sqrt(t))/(2*t)
+s:=rule(u(x,t) == f(x/sqrt(t))/sqrt(t))
+t1:=s(heat)
+t2:=subst(t1, x = z*sqrt(t))
+t3:=t2*denom(t2) = 0
+solve(t3, f, z)

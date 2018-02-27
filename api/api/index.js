@@ -4,7 +4,7 @@ import { AxiomSession } from './axiom-session'
 
 const app = express()
 
-const server = app.listen(process.env.API_PORT, () => {
+const server = app.listen(process.env.API_PORT, process.env.HOST, () => {
   console.log(`Api started at http://${process.env.HOST}${process.env.API_PORT ? ':' + process.env.API_PORT : ''}`)
 })
 
@@ -19,22 +19,27 @@ app.use((req, res, next) => {
 })
 
 io.on('connection', (socket) => {
-  socket.emit('connected', {message: 'Connected'})
-
+  socket.emit('log', {message: 'Connected'})
+  // TODO try/catch if axiom doesn't exist
   let AA = new AxiomSession()
+  socket.emit('log', {message: 'Axiom session created'})
 
   socket.on('evalCmd', ({cmd}) => {
+    socket.emit('log', {message: `Cmd received ${cmd}`})
+
     AA.sendCommand(cmd)
       .then((res) => {
+        socket.emit('log', {message: `Cmd evaluated ${res}`})
         socket.emit('evaluatedCmd', res)
       })
       .catch((err) => {
         // TODO: LOG
+        socket.emit('log', {message: `Error caught ${err}`})
         socket.emit('evaluatedCmd', {sysError: err})
       })
   })
 
   socket.on('disconnect', (data) => {
-    socket.emit('disconnected', {message: 'Disconnected'})
+    socket.emit('log', {message: 'Disconnected'})
   })
 })

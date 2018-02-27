@@ -1,0 +1,115 @@
+)set messages interponly off
+
+-- Input:
+--  p.....Polynomial with rational coefficients.
+-- Output:
+--  A list consisting of the Sturm sequence of the square free part of p.
+-- Checks:
+--  If p is univariate non-zero polynomial with rational coefficients, otherwise an error is signalled.
+Sturm(p:POLY(FRAC(INT))):List(POLY(FRAC(INT)))==
+  local V,x,S,i
+  if p=0 then error("The polynomial must not be 0")
+  else if totalDegree(p)=0 then [p]
+  else
+    V:=variables(p)
+    if #(V)>1 then error("The polynomial must be univariate")
+    x:=V.1
+    q:=p/gcd(p,D(p,x))
+    q1:UP(x,FRAC(INT)) :=q
+    q2:UP(x,FRAC(INT)) :=D(q,x)
+    S:=[q1,q2]
+    repeat
+      i := #S
+      qi:UP(x,FRAC(INT)) := -(S.(i-1) rem S.(i))
+      S := append(S, [qi])
+      if totalDegree(qi)=0 then break
+    S
+
+--Input:
+--  L.....a list of rationals.
+--Output:
+--  The number of sign variations in L.
+variation(L:List(FRAC(INT))):NNI==
+  local v
+  if L=[] then 0
+  else
+    v:=0
+    p:=L.1
+    for n in L repeat
+      if n~=0 then
+        if p~=0 and sign(p)~=sign(n) then v:=v+1
+        p:=n
+    v
+
+--Input:
+--  p.......a polynomial with rational coefficients.
+--  a,b.....rational numbers.
+--Output:
+--  The number of real roots of p in [a,b).
+--Checks:
+--  If p is not univariate or a>b then an error is signalled by the code.
+rootsCount(p:POLY(FRAC(INT)),a:FRAC(INT),b:FRAC(INT)):Union(NNI,String)==
+  local V,x,S
+  if a>b then
+    error("The first endpoint of the interval cannot be strictly larger than the second.")
+  V:=variables(p)
+  if #(V)>1 then error("The polynomial must be univariate")
+  else if p=0 then "infinite"
+  else
+    if #(V)=1 then x:=V.1
+    S:=Sturm(p)
+    variation(eval(S,x=a))-variation(eval(S,x=b))
+
+--------------------------------------------------------------------
+-- Put our code for checkIndet, padd and pmul below here.
+--------------------------------------------------------------------
+
+-- Input:
+--  f.....Polynomial with integer coefficients
+--  x.....indeterminate being considered.
+--  s.....name of the polynomial.
+-- Output:
+--  Nothing
+-- Checks:
+--  if p is a polynomial only in the indeterminate given by x, otherwise an error is signalled
+--  if p is a univariate polynomial, otherwise an error is signalled
+checkIndet(f:POLY(INT),x:Symbol,s:String):Void==
+  local V
+  V:= variables(f)
+  if #V=1 and not(V.1=x) then
+    error(concat("Your ", concat(s, " polynomial has an indeterminate other than specified")))
+  if #V>1 then error(concat("Your ", concat(s, " polynomial has too many indeterminates")))
+
+-- Input:
+--  q1, q2, p.....Polynomials in x with integer coefficients where p is nonzero in Z_{n}[x].
+--  x.............indeterminate considered.
+--  n.............prime number of the field
+-- Output:
+--  The representative of q1 + q2 in the ring Z_{n}[x]/(p)
+-- Checks:
+--  if q1, q2, univariate polynomials in indeterminate given by x
+--  if n is prime
+padd(q1:POLY(INT),q2:POLY(INT),p:POLY(INT),x:Symbol,n:INT):Any==
+  local res
+  checkIndet(q1, x, "first")
+  checkIndet(q2, x, "second")
+  checkIndet(p, x, "third")
+  if not(prime? n) then error("Fourth argument must be prime")
+  res:UP(x, PF n) := q1 + q2
+  p:=p::UP(x, PF n)
+  res := res rem p
+  res
+
+-- Input:
+--  q1, q2, p.....Polynomials in x with integer coefficients where p is nonzero in Z_{n}[x].
+--  x.............indeterminate considered.
+--  n.............prime number of the field
+-- Output:
+--  The representative of q1 * q2 in the ring Z_{n}[x]/(p)
+pmul:(UP(x,INT),UP(x,INT),UP(x,INT),Symbol,PositiveInteger)->Any
+pmul(q1,q2,p,x,n)==
+  local res
+  res:UP(x, PF n) := q1 * q2
+  p:=p::UP(x, PF n)
+  res := res rem p
+  res

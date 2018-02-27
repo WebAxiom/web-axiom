@@ -63,20 +63,27 @@ export class AxiomCommand {
   }
 
   serialize () {
-    this.errors = this.tokens
+    const errors = this.tokens
       .filter(token => token.id === labels.ERROR)
-    this.compilation = this.tokens
-      .filter(token => token.id === labels.COMPILATION)
+    const compilation = this.tokens
+      .filter(token => token.id === labels.COMPILATION || token.id === labels.NOTE)
+    const text = this.tokens
+      .filter(token => token.id === labels.PLAIN_TEXT)
+    this.containsText = text.length > 0
+    this.containsErrors = errors.length > 0
+    this.containsCompilation = compilation.length > 0
   }
 
   getPayload () {
     // TODO: Think of way to optimize
     return {
-      errors: this.errors,
-      compilation: this.compilation,
+      // errors: this.errors,
+      // compilation: this.compilation,
       input: this.input,
       lineno: this.lineno,
-      tokens: this.tokens
+      tokens: this.tokens,
+      containsText: this.containsText,
+      containsErrors: this.containsErrors
     }
   }
 

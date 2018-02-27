@@ -5,10 +5,12 @@ const NOTE = 'NOTE'
 const LATEX = 'LATEX'
 const PLAIN_TEXT = 'PLAIN_TEXT'
 
-const latexToKatex = (latex) => {
+const texToLatex = (latex) => {
   // TODO: think of better solution to this, but will work for now
   let mappings = [
-    ['\\sb', '_'],
+    [/\\mbox{\\rm([\s\S]*?)}/g, '\\mbox{$1}'],
+    [/\s*\\sp\s*/g, '^'],
+    [/\s*\\sb\s*/g, '_'],
     [/\\root {([\s\S]*?)} \\of {([\s\S]*?)}/g, '\\sqrt[$1]{$2}'],
     [/\s*\\leqno\(\d+\)/g, '']
   ]
@@ -102,7 +104,7 @@ export const patterns = [
     regex: [/\$\$([\s\S]*?)\$\$/],
     process: (match) => {
       return {
-        text: latexToKatex(match[0])
+        text: texToLatex(match[0])
       }
     }
   }
