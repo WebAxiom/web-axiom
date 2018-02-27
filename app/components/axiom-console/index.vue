@@ -11,8 +11,8 @@
                 </v-flex>
                 <v-flex class="pa-4">
                   <v-flex v-if="item.input" class="axiom-text pl-3 pt-3 pr-3">{{item.input}}</v-flex>
-                  <v-divider class=""></v-divider>
-                  <v-flex class="pl-3 pr-3 pt-2 pb-2">
+                  <v-divider class="mt-3 mb-3"></v-divider>
+                  <v-flex class="pl-3 pr-3 pb-2">
                     <v-flex :key="index" v-for="(token, index) in item.tokens">
                       <!-- TODO: Just proof of concept, definitely need rethinking-->
                       <pre v-if="token.plainText && item.displayPlainText">{{token.text}}</pre>
