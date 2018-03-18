@@ -1,11 +1,13 @@
 <template>
     <v-app>
+        <main>
         <options-toolbar></options-toolbar>
         <preferences></preferences>
         <tree-view></tree-view>
         <v-content>
             <nuxt/>
         </v-content>
+        </main>
     </v-app>
 </template>
 
@@ -15,9 +17,6 @@
   import Preferences from '~/components/settings'
 
   export default {
-    components: {OptionsToolbar, TreeView, Preferences},
-    data () {
-      return {}
-    }
+    components: {OptionsToolbar, TreeView, Preferences}
   }
 </script>

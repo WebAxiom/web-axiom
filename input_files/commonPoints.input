@@ -1,0 +1,27 @@
+)read ex2
+
+f:= x^2+y^2-1
+g:=x*y-1
+common(f,g,x,y)
+
+g:=x-y
+common(f,g,x,y)
+
+g:=x^2-y^2
+common(f,g,x,y)
+
+f:=y^3-2*x*y+3*x-1
+g:=x*y^2+x^2+y+1
+common(f,g,x,y)
+
+f:=y^2-x
+g:=y+1
+common(f,g,x,y)
+
+f:=x*y-x-y+1
+g:=y-1
+common(f,g,x,y)
+
+f:=x+y+1
+g:=x-y-1
+common(f,g,x,y)

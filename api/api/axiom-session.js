@@ -1,8 +1,16 @@
 import { spawn } from 'child_process'
 import { AxiomCommand } from './models'
+import path from 'path'
+import fs from 'fs'
 
 export class AxiomSession {
-  constructor () {
+  constructor (workingDir) {
+    let resolvedPath = path.resolve(process.cwd(), workingDir)
+    if (fs.existsSync(resolvedPath)) {
+      process.chdir(resolvedPath)
+    } else {
+      throw new Error(`Working directory ${resolvedPath} does not exist`)
+    }
     this.axiom = spawn('axiom', ['-noht', '-noclef', '-nox'])
     this.history = []
     this.buffer = []

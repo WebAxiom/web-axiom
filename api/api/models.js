@@ -10,7 +10,7 @@ export class AxiomCommand {
   }
 
   cleanInput () {
-    this.cleanCmd = this.input.replace(/(\n|\r)/, '')
+    this.cleanCmd = this.input.trim()
   }
 
   parseCommand () {
@@ -21,13 +21,21 @@ export class AxiomCommand {
   parseOutput (current) {
     let found = false
     let token = {}
-    let a = ''
-    let b = ''
+    let left = ''
+    let right = ''
     for (let pid in patterns) {
       if (!found) {
+        if (!patterns.hasOwnProperty(pid)) {
+          continue
+        }
         let pattern = patterns[pid]
         for (let regid in pattern.regex) {
-          if (found) break
+          if (!pattern.regex.hasOwnProperty(regid)) {
+            continue
+          }
+          if (found) {
+            break
+          }
           let regex = pattern.regex[regid]
           let match = regex.exec(current.text)
           if (match !== null) {
@@ -39,8 +47,8 @@ export class AxiomCommand {
             }
             token.start = current.start + match.index
             token.end = token.start + match[0].length
-            a = current.text.substr(0, match.index)
-            b = current.text.substr(match.index + match[0].length)
+            left = current.text.substr(0, match.index)
+            right = current.text.substr(match.index + match[0].length)
           }
         }
       }
@@ -48,17 +56,17 @@ export class AxiomCommand {
     if (!found) {
       token = {id: labels.PLAIN_TEXT, ...current}
     }
-    if (a.length > 0) {
-      this.parseOutput({text: a, start: current.start, end: token.start + 1})
+    if (left.length > 0) {
+      this.parseOutput({text: left, start: current.start, end: token.start + 1})
     }
     token.plainText = [labels.PLAIN_TEXT, labels.COMMENT, labels.NOTE].indexOf(token.id) !== -1
     token.latex = token.id === labels.LATEX
     token.compilation = token.id === labels.COMPILATION
     token.error = token.id === labels.ERROR
-    token.display = false
+    token.display = token.error
     this.tokens.push(token)
-    if (b.length > 0) {
-      this.parseOutput({text: b, start: token.end, end: current.end})
+    if (right.length > 0) {
+      this.parseOutput({text: right, start: token.end, end: current.end})
     }
   }
 
@@ -75,7 +83,6 @@ export class AxiomCommand {
   }
 
   getPayload () {
-    // TODO: Think of way to optimize
     return {
       // errors: this.errors,
       // compilation: this.compilation,
@@ -83,7 +90,8 @@ export class AxiomCommand {
       lineno: this.lineno,
       tokens: this.tokens,
       containsText: this.containsText,
-      containsErrors: this.containsErrors
+      containsErrors: this.containsErrors,
+      containsCompilation: this.containsCompilation
     }
   }
 

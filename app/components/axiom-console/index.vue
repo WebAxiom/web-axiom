@@ -14,7 +14,7 @@
                   <v-divider class="mt-3 mb-3"></v-divider>
                   <v-flex class="pl-3 pr-3 pb-2">
                     <v-flex :key="index" v-for="(token, index) in item.tokens">
-                      <!-- TODO: Just proof of concept, definitely need rethinking-->
+                      <!-- TODO: Just proof of concept, definitely needs rethinking-->
                       <pre v-if="token.plainText && item.displayPlainText">{{token.text}}</pre>
                       <latex-display :style="'max-width:' + latexWidth + 'px;}' + 'width:' + latexWidth + 'px;}'" v-if="token.latex" :latex="token.text"></latex-display>
                       <error-element v-if="token.error || token.compilation" :data="token"></error-element>
@@ -46,7 +46,7 @@
           </v-card>
         </v-flex>
         <v-flex row>
-          <axiom-input v-model="axiomCmd" @submit="submitCmd"></axiom-input>
+          <axiom-input class="axiom-input" v-model="axiomCmd" @submit="submitCmd"></axiom-input>
         </v-flex>
       </v-layout>
     </v-flex>
@@ -176,5 +176,6 @@
 <style lang="stylus" scoped>
   .command
     border: 1px #E0E0E0 solid
-
+  .codemirror
+      font-size 3rem !important
 </style>

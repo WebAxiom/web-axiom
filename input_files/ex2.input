@@ -1,0 +1,30 @@
+-- Input:
+--  f..... polynomial in indeterminates x, y with rational coefficients
+--  g..... polynomial in indeterminates x, y with rational coefficients
+--  x..... indeterminate symbol.
+--  x..... indeterminate symbol.
+-- Output:
+--  list of the common points of the curves defined by f, g
+-- Checks:
+--  if the curves f, g do not have infinitely many points in common, otherwise an error is signalled
+--  if the curves are in a good position, otherwise an error is signalled
+common(f:POLY(FRAC(INT)), g:POLY(FRAC(INT)), x:Symbol, y:Symbol):LIST(LIST(ANY))==
+  local sol, ff, gg, res, ifactors, p, k, G
+  ff:UP(y,UP(x,INT)) := f
+  gg:UP(y,UP(x,INT)) := g
+  if not(gcd(f, g) = 1) then
+      error "The curves have infinitely many common points"
+    else
+      sol := []
+      res := resultant(ff, gg)
+      ifactors := factors(res)
+      for r in ifactors repeat
+        if degree(r.factor) > 0 then
+          p := rootOf(r.factor)
+          G := squareFreePart(gcd(eval(ff, x=p), eval(gg, x=p)))
+          if not(degree(G, y) = 1) then
+              error "Curves in bad position"
+            else
+              k := rhs(first(solve(G, y)))
+              sol:= append(sol, [[x, k, r.factor]])
+      sol

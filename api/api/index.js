@@ -20,26 +20,31 @@ app.use((req, res, next) => {
 
 io.on('connection', (socket) => {
   socket.emit('log', {message: 'Connected'})
-  // TODO try/catch if axiom doesn't exist
-  let AA = new AxiomSession()
-  socket.emit('log', {message: 'Axiom session created'})
-
-  socket.on('evalCmd', ({cmd}) => {
-    socket.emit('log', {message: `Cmd received ${cmd}`})
-
-    AA.sendCommand(cmd)
-      .then((res) => {
-        socket.emit('log', {message: `Cmd evaluated ${res}`})
-        socket.emit('evaluatedCmd', res)
-      })
-      .catch((err) => {
-        // TODO: LOG
-        socket.emit('log', {message: `Error caught ${err}`})
-        socket.emit('evaluatedCmd', {sysError: err})
-      })
-  })
-
-  socket.on('disconnect', (data) => {
+  socket.on('disconnect', () => {
     socket.emit('log', {message: 'Disconnected'})
   })
+  // TODO try/catch if axiom doesn't exist
+  try {
+    let session = new AxiomSession(process.env.WORKING_DIR)
+
+    socket.emit('log', {message: 'Axiom session created'})
+
+    socket.on('evalCmd', ({cmd}) => {
+      socket.emit('log', {message: `Cmd received ${cmd}`})
+
+      session.sendCommand(cmd)
+        .then((res) => {
+          socket.emit('log', {message: `Cmd evaluated ${res}`})
+          socket.emit('evaluatedCmd', res)
+        })
+        .catch((err) => {
+          // TODO: LOG
+          socket.emit('log', {message: `Error caught ${err}`})
+          socket.emit('evaluatedCmd', {sysError: err})
+        })
+    })
+  } catch (error) {
+    console.log(error)
+    socket.disconnect()
+  }
 })

@@ -34,7 +34,7 @@ export const labels = {
 export const patterns = [
   {
     id: ERROR,
-    regex: [/^(\s*?Line\s*(\d+):[\s\S]*?)*([\t ]*(\d+) error\(s\) parsing)/m],
+    regex: [/^( {2}Line\s*(\d+):[\s\S]*?)+?([\t ]*(\d+) error\(s\) parsing)/m],
     process: (match) => {
       return {
         type: 'Syntax error'
@@ -43,7 +43,7 @@ export const patterns = [
   },
   {
     id: ERROR,
-    regex: [/^\s*?Error signalled from user code[\S ]*?:\n[\s\S]+?\n?\n/m],
+    regex: [/^ {3}Error signalled from user code[\S ]*?:\n[\s\S]+?\n?\n/m],
     process: (match) => {
       return {
         type: 'Error in user code'
@@ -52,7 +52,7 @@ export const patterns = [
   },
   {
     id: ERROR,
-    regex: [/^\s*?>> Error detected within library code[\S ]*?:\n[\s\S]+?\n?\n/m],
+    regex: [/^ {3}>> Error detected within library code[\S ]*?:\n[\s\S]+?\n?\n/m],
     process: (match) => {
       return {
         type: 'Error in library code'

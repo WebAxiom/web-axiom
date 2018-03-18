@@ -17,7 +17,7 @@ module.exports = {
       {src: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'}
     ]
   },
-  plugins: ['~/plugins/vuetify.js'],
+  plugins: ['~/plugins/vuetify.js', '~/plugins/mathjax.js', '~/plugins/cm.js'],
   css: [
     '~/assets/style/app.styl',
     '~/node_modules/mdi/css/materialdesignicons.css'
@@ -31,7 +31,9 @@ module.exports = {
   */
   build: {
     vendor: [
-      '~/plugins/vuetify.js'
+      '~/plugins/vuetify.js',
+      '~/plugins/cm.js',
+      '~/plugins/mathjax.js'
     ],
     extractCSS: true,
     /*
